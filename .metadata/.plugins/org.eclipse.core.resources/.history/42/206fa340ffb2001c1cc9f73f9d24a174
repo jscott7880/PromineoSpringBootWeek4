@@ -1,0 +1,146 @@
+package com.promineotech.jeep.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
+import com.promineotech.jeep.entity.Color;
+import com.promineotech.jeep.entity.Customer;
+import com.promineotech.jeep.entity.Engine;
+import com.promineotech.jeep.entity.Jeep;
+import com.promineotech.jeep.entity.JeepModel;
+import com.promineotech.jeep.entity.Order;
+import com.promineotech.jeep.entity.OrderRequest;
+import com.promineotech.jeep.entity.Tire;
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+public class DefaultJeepOrderDao implements JeepOrderDao {
+  @Autowired
+  private NamedParameterJdbcTemplate jdbcTemplate;  
+  
+  @Override
+  public Optional<Customer> fetchCustomer(String customerId) {
+    String sql = ""
+        + "SELECT * "
+        + "FROM customers "
+        + "WHERE customer_id = :customer_id";
+    
+    Map<String, Object> params = new HashMap<>();
+    params.put("customer_id", customerId);
+    
+    return Optional.ofNullable(query(sql, params, new CustomerResultSetExtractor()));
+  }
+  
+  public Jeep fetchModel(JeepModel model, String trim, int doors) {
+    String sql = ""
+        + "SELECT * "
+        + "FROM models "
+        + "WHERE model_id = :model_id "
+        + "AND trim_level = :trim_level "
+        + "AND num_doors = :num_doors";
+    
+    Map<String, Object> params = new HashMap<>();
+    params.put("model_id", model.toString());
+    params.put("trim_level", trim);
+    params.put("num_doors", doors);
+    
+    return jdbcTemplate.query(sql, params, new ModelResultSetExtractor());
+  }
+  
+  @Override
+  public Color fetchColor(String colorId) {
+    String sql = ""
+        + "SELECT * "
+        + "FROM colors "
+        + "WHERE color_id = :color_id";
+    
+    Map<String, Object> params = new HashMap<>();
+    params.put("color_id", colorId);
+    
+    return jdbcTemplate.query(sql,  params, new ColorResultExtractor());
+  }
+  
+  @Override
+  public Engine fetchEngine(String engineId) {
+    String sql = ""
+        + "SELECT * "
+        + "FROM engines "
+        + "WHERE engine_id = :engine_id";
+    
+    Map<String, Object> params = new HashMap<>();
+    params.put("engine_ID", engineId);
+    
+    return jdbcTemplate.query(sql, params, new EngineResultSetExtractor());    
+  }
+  
+  @Override
+  public Tire fetchTire(String tireId) {
+    String sql = ""
+        + "SELECT * "
+        + "FROM tires "
+        + "WHERE tire_id = :tire_id";
+    
+    Map<String, Object> params = new HashMap<>();
+    params.put("tire_id", tireId);
+    
+    return jdbcTemplate.query(sql, params, new TireResultSetExtractor());
+  }
+  
+  class ColorResultSetExtractor implements ResultSetExtractor<Color> {
+    @Override
+    public Color extractData(ResultSet rs) throws SQLException {
+      rs.next();
+      
+      return Color.builder()
+          .colorPK(rs.getLong("color_pk"))
+          .colorId(rs.getString("color_id"))
+          .color(rs.getString("color"))
+          .price(rs.getBigDecimal("price"))
+          .isExterior(rs.getBoolean("is_exterior"))
+          .build();
+    }
+  }
+  
+  class ModelResultSetExtractor implements ResultSetExtractor<Jeep> {
+    @Override
+    public Jeep extractData(ResultSet rs) 
+        throws SQLException {
+          rs.next();
+        
+      return Jeep.builder()
+          .modelPK(rs.getLong("model_pk"))
+          .modelId(rs.getString("model_id"))
+          .trimLevel(rs.getString("trim_level"))
+          .numDoors(rs.getLong("num_doors"))
+          .wheelSize(rs.getLong("wheel_size"))
+          .basePrice(rs.getBigDecimal("base_price"))
+          .build();
+        
+    
+  
+
+  class CustomerResultSetExtractor implements ResultSetExtractor<Customer> {
+    @Override
+    public Customer extractData(ResultSet rs) 
+        throws SQLException, DataAccessException {
+      rs.next();
+      
+      return Customer.builder()
+          .customerId(rs.getString("customer_id"))
+          .customerPK(rs.getLong("customer_pk"))
+          .firstName(rs.getString("first_name"))
+          .lastName(rs.getString("last_name"))
+          .phone(rs.getString("phone"))
+          .build();
+    }
+   }
+  }
+ }
+}

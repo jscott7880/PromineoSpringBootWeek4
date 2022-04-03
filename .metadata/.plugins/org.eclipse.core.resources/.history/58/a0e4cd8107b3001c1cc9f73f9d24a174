@@ -1,0 +1,23 @@
+package com.promineotech.jeep.dao;
+
+import java.util.Optional;
+import com.promineotech.jeep.entity.Color;
+import com.promineotech.jeep.entity.Customer;
+import com.promineotech.jeep.entity.Engine;
+import com.promineotech.jeep.entity.Jeep;
+import com.promineotech.jeep.entity.JeepModel;
+import com.promineotech.jeep.entity.Tire;
+
+public interface JeepOrderDao {
+
+  Optional<Customer> fetchCustomer(String customer);
+
+  Optional<Jeep> fetchModel(JeepModel model, String trim, String trim2, int doors);
+
+  Optional<Color> fetchColor(String color);
+
+  Optional<Engine> fetchEngine(String engine);
+
+  Optional<Tire> fetchTire(String tire);
+  
+}
